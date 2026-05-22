@@ -2,9 +2,9 @@ name: CI/CD
 
 on:
   push:
-    branches: [main]
+    branches: [dev]
   pull_request:
-    branches: [main]
+    branches: [dev]
 
 permissions:
   contents: read
@@ -84,11 +84,11 @@ jobs:
           DH_USER: ${{ secrets.DOCKERHUB_USERNAME }}
           DH_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
         run: |
-          if [ "${{ github.event_name }}" != "push" ] || [ "${{ github.ref }}" != "refs/heads/main" ]; then
+          if [ "${{ github.event_name }}" != "push" ] || { [ "${{ github.ref }}" != "refs/heads/main" ] && [ "${{ github.ref }}" != "refs/heads/dev" ]; }; then
             echo "push=false" >> $GITHUB_OUTPUT
             echo "backend_tag=projet-cloud-backend:ci" >> $GITHUB_OUTPUT
             echo "frontend_tag=projet-cloud-frontend:ci" >> $GITHUB_OUTPUT
-            echo "::notice::Build uniquement sur pull request. Le push DockerHub est réservé aux pushes sur main."
+            echo "::notice::Build uniquement sur pull request. Le push DockerHub est réservé aux pushes sur main ou dev."
           elif [ -z "$DH_USER" ] || [ -z "$DH_TOKEN" ]; then
             echo "push=false" >> $GITHUB_OUTPUT
             echo "backend_tag=projet-cloud-backend:ci" >> $GITHUB_OUTPUT
