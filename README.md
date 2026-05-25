@@ -1,5 +1,6 @@
 # Projet Cloud — Template MicroScore (Master IA, 2iE)
 
+
 Template pédagogique du projet fil rouge des ECUE *Projet Cloud* et
 *Sécurité & Coûts dans le Cloud*. Le cas d'usage fourni est **MicroScore** :
 une application de scoring de crédit en microfinance.
