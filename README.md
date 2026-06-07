@@ -401,8 +401,6 @@ Checklist :
 ├── backend/                  API FastAPI
 ├── frontend/                 React + Vite + nginx
 ├── scripts/train.py          entraînement du modèle EduScore
-├── docs/livrable1/           sécurité, coûts, cartographie des risques
-├── docs/livrable2/           rapport final
 ├── docker-compose.yml
 ├── .env.example
 └── .github/workflows/ci-cd.yml
