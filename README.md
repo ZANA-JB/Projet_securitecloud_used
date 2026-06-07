@@ -6,10 +6,7 @@
 décrochage scolaire.
 
 
-## Démarrage Étudiant
-
-Pré-requis : Docker Desktop, Git, un terminal, un compte GitHub. Pour la suite
-du cours : Docker Hub, AWS CLI configuré et accès AWS de votre groupe.
+## Démarrage 
 
 ```bash
 git clone https://github.com/<votre-org>/<votre-repo>.git
@@ -83,9 +80,7 @@ Variables à connaître :
 | `MODEL_S3_BUCKET`, `MODEL_S3_KEY` | Chargement du modèle depuis S3 |
 | `AWS_REGION` | Région AWS, par défaut `eu-west-1` |
 
-Le fichier `client_secret_*.json` téléchargé depuis Google Cloud ne doit pas
-être copié dans le projet. Pour cette app, on utilise seulement le `client_id`
-public qu'il contient.
+
 
 Pour activer Google Login en local :
 
@@ -261,8 +256,7 @@ MODEL_S3_KEY=model.pkl
 AWS_REGION=eu-west-1
 ```
 
-En local, on peut utiliser des clés AWS dans `.env` si le compte de TP le
-prévoit. Sur ECS, on utilise un rôle IAM attaché à la task, pas de clés en dur.
+
 
 Important : `scripts/build-images.sh`, `scripts/push-dockerhub.sh` et
 `scripts/push-ecr.sh` construisent/poussent des images Docker. Ils ne créent
