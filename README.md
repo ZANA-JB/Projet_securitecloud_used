@@ -362,38 +362,14 @@ ajouter le secret GitHub :
 
 ## ECS Fargate
 
-À réutiliser depuis la séance IAM/VPC :
 
 - VPC avec subnets publics et privés.
 - Rôle `ecsTaskExecutionRole` pour ECR + CloudWatch Logs.
-- Rôle applicatif avec lecture seule sur `s3://2ie-<groupe>-models/model.pkl`.
-- Security groups : `alb-sg`, `backend-sg`, `db-sg`.
+- Rôle applicatif avec lecture seule sur `s3://2ie-bakouan01-models/model.pkl`.
+- Security groups : `ALB-SG`, `BACKEND-SG`, `DB-SG`.
 - RDS PostgreSQL dans subnet privé.
 - ALB public vers le service ECS.
 
-Fichiers d'exemple :
-
-- `infra/aws/s3-model-read-policy.example.json`
-- `infra/aws/task-definition-backend.example.json`
-- `infra/aws/task-definition-frontend.example.json`
-
-Variables d'environnement à mettre dans la task definition backend :
-
-```bash
-DATABASE_URL=postgresql://<user>:<password>@<rds-endpoint>:5432/<db>
-MODEL_S3_BUCKET=2ie-<groupe>-models
-MODEL_S3_KEY=model.pkl
-AWS_REGION=eu-west-1
-GOOGLE_CLIENT_ID=<client-id-google>
-JWT_SECRET=<secret-long-aleatoire>
-ADMIN_EMAILS=<email-admin-1>,<email-admin-2>
-```
-
-Le frontend en production doit être buildé avec :
-
-```bash
-VITE_API_URL=/api
-VITE_GOOGLE_CLIENT_ID=<client-id-google>
 ```
 
 ## Vérifications Avant Rendu
@@ -432,14 +408,6 @@ Checklist :
 └── .github/workflows/ci-cd.yml
 ```
 
-## Règles Non Négociables
 
-- `uv` pour Python, jamais `requirements.txt`.
-- `.env` jamais commité.
-- Aucun secret en dur dans le code.
-- Les fichiers `client_secret*.json` restent hors dépôt.
-- Le formulaire de scoring exige une authentification Google.
-- `/predict` reste rate-limité.
-- Pas de push Git automatique : chaque groupe contrôle ses commits et ses pushs.
 
 Projet pédagogique — Master IA, 2iE.
