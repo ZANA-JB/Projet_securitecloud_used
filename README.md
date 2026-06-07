@@ -103,7 +103,7 @@ puis recharger la page.
 
 Le schémas AWS est dans [`infra/aws/`](infra/aws/) :
 
-- `architecture_AWS.png` 
+- `architecture_AWS.png` : image de l'architecture AWS
 
 ## Architecture AWS
 
@@ -236,8 +236,8 @@ backend/models/model.pkl
 Créer le bucket S3 privé et uploader le modèle :
 
 ```bash
-aws s3 mb s3://2ie-<groupe>-models --region eu-west-1
-aws s3 cp backend/models/model.pkl s3://2ie-<groupe>-models/model.pkl
+aws s3 mb s3://2ie-bakouan01-models --region eu-west-1
+aws s3 cp backend/models/model.pkl s3://2ie-bakouan01-models/model.pkl
 ```
 
 Ou utiliser le script du template, qui crée le bucket privé si nécessaire et
