@@ -5,8 +5,8 @@
  * Le JWT est stocké en localStorage et envoyé en Authorization: Bearer.
  */
 
-const TOKEN_KEY = 'microscore_token'
-const USER_KEY = 'microscore_user'
+const TOKEN_KEY = 'eduscore_token'
+const USER_KEY = 'eduscore_user'
 
 export function getToken() {
   return localStorage.getItem(TOKEN_KEY) || ''

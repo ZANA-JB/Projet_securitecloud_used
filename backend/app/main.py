@@ -5,21 +5,21 @@ En conteneur (Docker / ECS), il n'y a pas de .env : c'est un no-op, les variable
 viennent de l'environnement.
 """
 
+from contextlib import asynccontextmanager
+
 from dotenv import load_dotenv
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from slowapi import _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
+
+from app.db import init_db
+from app.ml.model import load_model
+from app.ratelimit import limiter
+from app.routes import admin, auth, health, items, predict
+from app.routes import fields as fields_router
 
 load_dotenv()
-
-from contextlib import asynccontextmanager  # noqa: E402
-
-from fastapi import FastAPI  # noqa: E402
-from fastapi.middleware.cors import CORSMiddleware  # noqa: E402
-from slowapi import _rate_limit_exceeded_handler  # noqa: E402
-from slowapi.errors import RateLimitExceeded  # noqa: E402
-
-from app.db import init_db  # noqa: E402
-from app.ml.model import load_model  # noqa: E402
-from app.ratelimit import limiter  # noqa: E402
-from app.routes import admin, auth, health, items, predict  # noqa: E402
 
 
 @asynccontextmanager
@@ -29,7 +29,7 @@ async def lifespan(app: FastAPI):
     yield
 
 
-app = FastAPI(title="Projet Cloud - Template 2iE", version="0.2.0", lifespan=lifespan)
+app = FastAPI(title="Projet Cloud - EduScore", version="0.2.0", lifespan=lifespan)
 
 # Rate limiting (slowapi)
 app.state.limiter = limiter
@@ -52,3 +52,4 @@ app.include_router(items.router, prefix="/api")
 app.include_router(predict.router, prefix="/api")
 app.include_router(auth.router, prefix="/api")
 app.include_router(admin.router, prefix="/api")
+app.include_router(fields_router.router, prefix="/api")

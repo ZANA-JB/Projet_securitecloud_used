@@ -5,7 +5,16 @@ from app.db import SessionLocal
 from app.main import app
 from app.models.user import User
 
-FEATURES = [30, 1, 0, 200, 500, 12, 0]
+VALID_PAYLOAD = {
+    "level": 2,
+    "main_subject": 1,
+    "average_grade": 14.5,
+    "attendance_rate": 92.0,
+    "study_hours_per_week": 10,
+    "resources_access": 2,
+    "last_exam_result": 0,
+    "applicant_name": "Élève Test",
+}
 
 
 def auth_headers() -> dict[str, str]:
@@ -30,31 +39,34 @@ def auth_headers() -> dict[str, str]:
 def test_predict_requires_authentication():
     """Le formulaire de scoring est privé : un JWT applicatif est requis."""
     with TestClient(app) as client:
-        r = client.post("/api/predict", json={"features": FEATURES})
+        r = client.post("/api/predict", json=VALID_PAYLOAD)
         assert r.status_code == 401
 
 
-def test_predict_credit_fallback():
-    """Vérifie le fallback MicroScore avec les 7 features du formulaire."""
+def test_predict_eduscore_fallback():
+    """Vérifie le fallback EduScore avec le schéma de prédiction éducation."""
     with TestClient(app) as client:
-        r = client.post("/api/predict", json={"features": FEATURES}, headers=auth_headers())
+        r = client.post("/api/predict", json=VALID_PAYLOAD, headers=auth_headers())
         assert r.status_code == 200
         body = r.json()
-        assert body["prediction"] in {"refusé", "accordé"}
-        assert len(body["proba"]) == 2
+        assert body["prediction"] in {"En réussite", "À surveiller", "À risque de décrochage"}
+        assert len(body["proba"]) == 3
 
 
-def test_predict_rejects_wrong_feature_count():
-    """Le backend renvoie 400 si le modèle refuse l'input (mauvaise shape)."""
+def test_predict_rejects_wrong_schema():
+    """Le backend renvoie 422 si le schéma de prédiction n'est pas respecté."""
+    invalid_payload = VALID_PAYLOAD.copy()
+    invalid_payload["last_exam_result"] = 5
     with TestClient(app) as client:
-        r = client.post("/api/predict", json={"features": [1.0, 2.0, 3.0]}, headers=auth_headers())
-        assert r.status_code == 400
+        r = client.post("/api/predict", json=invalid_payload, headers=auth_headers())
+        assert r.status_code == 422
 
 
-def test_predict_rejects_empty_features():
-    """Schéma Pydantic : features non vide."""
+def test_predict_rejects_missing_required_fields():
+    """Schéma Pydantic : les champs requis doivent être fournis."""
+    payload = {"applicant_name": "Élève Test"}
     with TestClient(app) as client:
-        r = client.post("/api/predict", json={"features": []}, headers=auth_headers())
+        r = client.post("/api/predict", json=payload, headers=auth_headers())
         assert r.status_code == 422
 
 
@@ -65,5 +77,5 @@ def test_predict_rate_limit():
     """
     with TestClient(app) as client:
         headers = auth_headers()
-        statuses = [client.post("/api/predict", json={"features": FEATURES}, headers=headers).status_code for _ in range(25)]
+        statuses = [client.post("/api/predict", json=VALID_PAYLOAD, headers=headers).status_code for _ in range(25)]
         assert 429 in statuses, "Le rate limit aurait dû déclencher un 429"

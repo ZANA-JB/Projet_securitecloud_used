@@ -1,10 +1,7 @@
-"""Endpoint d'inférence générique.
+"""Endpoint d'inférence générique pour EduScore.
 
-Adapte automatiquement le format de sortie selon le type de modèle (classif vs
-régression). Persiste chaque prédiction en base pour l'admin dashboard.
-
-Rate limiting : /predict est plafonné par IP pour limiter le model stealing
-(clonage du modèle par envoi massif de requêtes).
+Construit la liste de features à partir des champs nommés du schéma `PredictIn`.
+Persiste chaque prédiction en base pour l'admin dashboard.
 """
 
 from fastapi import APIRouter, Depends, HTTPException, Request
@@ -12,7 +9,7 @@ from sqlalchemy.orm import Session
 
 from app.auth import get_current_user
 from app.db import get_db
-from app.ml.credit_model import LABELS
+from app.ml.credit_model import FEATURE_NAMES, LABELS
 from app.models.prediction import Prediction
 from app.models.user import User
 from app.ratelimit import limiter
@@ -32,7 +29,9 @@ def predict(
     model = request.app.state.model
 
     try:
-        X = [payload.features]
+        # Construire automatiquement la liste de features dans l'ordre FEATURE_NAMES
+        features = [float(getattr(payload, name)) for name in FEATURE_NAMES]
+        X = [features]
         proba_list: list[float] | None = None
         score: int | None = None
 
@@ -41,27 +40,25 @@ def predict(
             idx = int(proba.argmax())
             label = LABELS[idx] if idx < len(LABELS) else str(idx)
             proba_list = proba.tolist()
-            # Score = proba de la classe positive (dernière) normalisée sur 1000
-            score = int(proba_list[-1] * 1000) if len(proba_list) >= 2 else int(max(proba_list) * 1000)
+            # Score = probabilité maximale entre 0 et 100
+            score = int(max(proba_list) * 100)
             prediction_str = label
         else:
             pred = model.predict(X)[0]
             prediction_str = str(float(pred))
 
-    except ValueError as exc:
+    except Exception as exc:
         raise HTTPException(
             status_code=400,
-            detail=f"Le modèle a refusé l'input : {exc}. Vérifiez le nombre de features.",
+            detail=f"Le modèle a refusé l'input : {exc}. Vérifiez les champs envoyés.",
         ) from exc
 
     record = Prediction(
         applicant_name=payload.applicant_name,
-        features=payload.features,
+        features=payload.model_dump(),
         prediction=prediction_str,
         score=score,
         proba=proba_list,
-        amount=payload.amount,
-        duration_months=payload.duration_months,
     )
     db.add(record)
     db.commit()
