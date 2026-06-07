@@ -103,8 +103,7 @@ puis recharger la page.
 
 Le schémas AWS est dans [`infra/aws/`](infra/aws/) :
 
-- `architecture.png` : variante de référence, tâches ECS en subnet privé.
-- `architecture-budget.png` : variante de TP, sans NAT Gateway, tâches ECS en subnet public protégées par Security Groups.
+- `architecture_AWS.png` 
 
 ## Architecture AWS
 
