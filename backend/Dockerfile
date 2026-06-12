@@ -1,6 +1,6 @@
 # Image de base figee par digest pour reproductibilite (le tag :3.11-slim-bookworm
 # bouge dans le temps). Mettre a jour periodiquement en re-pinnant le nouveau sha.
-FROM python:3.11-slim-bookworm@sha256:cd67330292a51e2963156f74ff340455d66b2172e9190e99f40dff9357471177
+FROM python:3.11-slim-bookworm
 
 # upgrade : recupere les patches de securite OS publies apres la derniere
 # republication de l'image de base (sinon Trivy bloque sur des CVE deja
