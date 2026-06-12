@@ -11,10 +11,8 @@ from contextlib import asynccontextmanager
 from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-# pyrefly: ignore [missing-import]
-from slowapi import _rate_limit_exceeded_handler
-# pyrefly: ignore [missing-import]
-from slowapi.errors import RateLimitExceeded
+from slowapi import _rate_limit_exceeded_handler  # pyrefly: ignore [missing-import]
+from slowapi.errors import RateLimitExceeded  # pyrefly: ignore [missing-import]
 
 from app.db import init_db
 from app.ml.model import load_model
