@@ -11,8 +11,8 @@ permissions:
 
 env:
   AWS_REGION: ${{ vars.AWS_REGION || 'eu-west-1' }}
-  ECR_BACKEND_REPO: ${{ vars.ECR_BACKEND_REPO || 'projet-cloud-backend' }}
-  ECR_FRONTEND_REPO: ${{ vars.ECR_FRONTEND_REPO || 'projet-cloud-frontend' }}
+  ECR_BACKEND_REPO: ${{ vars.ECR_BACKEND_REPO || 'eduscore-backend' }}
+  ECR_FRONTEND_REPO: ${{ vars.ECR_FRONTEND_REPO || 'eduscore-frontend' }}
 
 jobs:
   push-ecr:

@@ -14,8 +14,8 @@ if (Test-Path ".\.env") {
 $AWS_ACCOUNT_ID = $env:AWS_ACCOUNT_ID
 $AWS_REGION = $env:AWS_REGION -eq "" ? "eu-west-1" : $env:AWS_REGION
 $IMAGE_TAG = $env:IMAGE_TAG -eq "" ? "latest" : $env:IMAGE_TAG
-$BACKEND_REPO = $env:BACKEND_REPO -eq "" ? "projet-cloud-backend" : $env:BACKEND_REPO
-$FRONTEND_REPO = $env:FRONTEND_REPO -eq "" ? "projet-cloud-frontend" : $env:FRONTEND_REPO
+$BACKEND_REPO = $env:BACKEND_REPO -eq "" ? "eduscore-backend" : $env:BACKEND_REPO
+$FRONTEND_REPO = $env:FRONTEND_REPO -eq "" ? "eduscore-frontend" : $env:FRONTEND_REPO
 $VITE_API_URL = $env:VITE_API_URL -eq "" ? "/api" : $env:VITE_API_URL
 $VITE_GOOGLE_CLIENT_ID = $env:VITE_GOOGLE_CLIENT_ID
 

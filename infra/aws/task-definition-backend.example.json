@@ -9,7 +9,7 @@
   "containerDefinitions": [
     {
       "name": "backend",
-      "image": "<account-id>.dkr.ecr.<region>.amazonaws.com/projet-cloud-backend:latest",
+      "image": "639914974992.dkr.ecr.eu-west-1.amazonaws.com/eduscore-backend:latest",
       "essential": true,
       "portMappings": [
         {
