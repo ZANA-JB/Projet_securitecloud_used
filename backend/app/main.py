@@ -6,6 +6,7 @@ viennent de l'environnement.
 """
 
 from contextlib import asynccontextmanager
+import logging
 
 from dotenv import load_dotenv
 from fastapi import FastAPI
@@ -21,10 +22,15 @@ from app.routes import fields as fields_router
 
 load_dotenv()
 
+logger = logging.getLogger(__name__)
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    init_db()
+    try:
+        init_db()
+    except Exception as exc:
+        logger.warning("Initialisation de la base ignorée au démarrage: %s", exc)
     app.state.model = load_model()
     yield
 
