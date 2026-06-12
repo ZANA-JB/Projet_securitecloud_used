@@ -125,11 +125,11 @@ jobs:
           case "$SERVICE_NAME" in
             backend)
               ECS_SERVICE="$ECS_BACKEND_SERVICE"
-              ECR_REPO="eduscore-backend"
+              ECR_REPO="projet-cloud-backend"
               ;;
             frontend)
               ECS_SERVICE="$ECS_FRONTEND_SERVICE"
-              ECR_REPO="eduscore-frontend"
+              ECR_REPO="projet-cloud-frontend"
               ;;
           esac
 

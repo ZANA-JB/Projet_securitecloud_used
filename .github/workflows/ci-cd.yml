@@ -138,8 +138,8 @@ jobs:
     if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev')
     env:
       AWS_REGION: ${{ vars.AWS_REGION || 'eu-west-1' }}
-      ECR_BACKEND_REPO: ${{ vars.ECR_BACKEND_REPO || 'eduscore-backend' }}
-      ECR_FRONTEND_REPO: ${{ vars.ECR_FRONTEND_REPO || 'eduscore-frontend' }}
+      ECR_BACKEND_REPO: ${{ vars.ECR_BACKEND_REPO || 'projet-cloud-backend' }}
+      ECR_FRONTEND_REPO: ${{ vars.ECR_FRONTEND_REPO || 'projet-cloud-frontend' }}
     steps:
       - uses: actions/checkout@v4
       - name: Verifier la config AWS ECR
