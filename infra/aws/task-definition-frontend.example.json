@@ -1,5 +1,5 @@
 {
-  "family": "projet-cloud-frontend",
+  "family": "eduscore-frontend",
   "networkMode": "awsvpc",
   "requiresCompatibilities": ["FARGATE"],
   "cpu": "256",
@@ -8,7 +8,7 @@
   "containerDefinitions": [
     {
       "name": "frontend",
-      "image": "<account-id>.dkr.ecr.<region>.amazonaws.com/projet-cloud-frontend:latest",
+      "image": "<account-id>.dkr.ecr.<region>.amazonaws.com/eduscore-frontend:latest",
       "essential": true,
       "portMappings": [
         {
@@ -19,7 +19,7 @@
       "logConfiguration": {
         "logDriver": "awslogs",
         "options": {
-          "awslogs-group": "/ecs/projet-cloud-frontend",
+          "awslogs-group": "/ecs/eduscore-frontend",
           "awslogs-region": "<region>",
           "awslogs-stream-prefix": "ecs"
         }

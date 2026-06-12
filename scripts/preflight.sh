@@ -16,15 +16,15 @@
 #
 # Configuration (memes valeurs que le workflow, surchargeables) :
 #   AWS_REGION             defaut eu-west-1
-#   ECS_CLUSTER            defaut projet-cloud-cluster
-#   ECS_BACKEND_SERVICE    defaut projet-cloud-backend-service
-#   ECS_FRONTEND_SERVICE   defaut projet-cloud-frontend-service
-#   ECR_BACKEND_REPO       defaut projet-cloud-backend
-#   ECR_FRONTEND_REPO      defaut projet-cloud-frontend
+#   ECS_CLUSTER            defaut eduscore-cluster
+#   ECS_BACKEND_SERVICE    defaut eduscore-backend-service
+#   ECS_FRONTEND_SERVICE   defaut eduscore-frontend-service
+#   ECR_BACKEND_REPO       defaut eduscore-backend
+#   ECR_FRONTEND_REPO      defaut eduscore-frontend
 #
 # Exemple si vous avez nomme votre cluster autrement :
-#   ECS_CLUSTER=microscore-cluster ECS_BACKEND_SERVICE=microservice_backend \
-#   ECS_FRONTEND_SERVICE=mcroservice_frontend bash scripts/preflight.sh
+#   ECS_CLUSTER=eduscore-cluster ECS_BACKEND_SERVICE=eduscore-backend-service \
+#   ECS_FRONTEND_SERVICE=eduscore-frontend-service bash scripts/preflight.sh
 
 set -uo pipefail
 # Git Bash (Windows) : ne pas transformer les ARNs en chemins Windows.
@@ -32,11 +32,11 @@ export MSYS_NO_PATHCONV=1
 export MSYS2_ARG_CONV_EXCL='*'
 
 AWS_REGION="${AWS_REGION:-eu-west-1}"
-ECS_CLUSTER="${ECS_CLUSTER:-projet-cloud-cluster}"
-ECS_BACKEND_SERVICE="${ECS_BACKEND_SERVICE:-projet-cloud-backend-service}"
-ECS_FRONTEND_SERVICE="${ECS_FRONTEND_SERVICE:-projet-cloud-frontend-service}"
-ECR_BACKEND_REPO="${ECR_BACKEND_REPO:-projet-cloud-backend}"
-ECR_FRONTEND_REPO="${ECR_FRONTEND_REPO:-projet-cloud-frontend}"
+ECS_CLUSTER="${ECS_CLUSTER:-eduscore-cluster}"
+ECS_BACKEND_SERVICE="${ECS_BACKEND_SERVICE:-eduscore-backend-service}"
+ECS_FRONTEND_SERVICE="${ECS_FRONTEND_SERVICE:-eduscore-frontend-service}"
+ECR_BACKEND_REPO="${ECR_BACKEND_REPO:-eduscore-backend}"
+ECR_FRONTEND_REPO="${ECR_FRONTEND_REPO:-eduscore-frontend}"
 export AWS_DEFAULT_REGION="$AWS_REGION"
 
 if [ -t 1 ]; then

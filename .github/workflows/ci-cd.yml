@@ -81,17 +81,17 @@ jobs:
         run: |
           if [ "${{ github.event_name }}" != "push" ] || { [ "${{ github.ref }}" != "refs/heads/main" ] && [ "${{ github.ref }}" != "refs/heads/dev" ]; }; then
             echo "push=false" >> $GITHUB_OUTPUT
-            echo "backend_tag=projet-cloud-backend:ci" >> $GITHUB_OUTPUT
-            echo "frontend_tag=projet-cloud-frontend:ci" >> $GITHUB_OUTPUT
+            echo "backend_tag=eduscore-backend:ci" >> $GITHUB_OUTPUT
+            echo "frontend_tag=eduscore-frontend:ci" >> $GITHUB_OUTPUT
           elif [ -z "$DH_USER" ] || [ -z "$DH_TOKEN" ]; then
             echo "push=false" >> $GITHUB_OUTPUT
-            echo "backend_tag=projet-cloud-backend:ci" >> $GITHUB_OUTPUT
-            echo "frontend_tag=projet-cloud-frontend:ci" >> $GITHUB_OUTPUT
+            echo "backend_tag=eduscore-backend:ci" >> $GITHUB_OUTPUT
+            echo "frontend_tag=eduscore-frontend:ci" >> $GITHUB_OUTPUT
             echo "::warning::Configurer DOCKERHUB_USERNAME et DOCKERHUB_TOKEN dans Settings > Secrets."
           else
             echo "push=true" >> $GITHUB_OUTPUT
-            echo "backend_tag=${DH_USER}/projet-cloud-backend:latest" >> $GITHUB_OUTPUT
-            echo "frontend_tag=${DH_USER}/projet-cloud-frontend:latest" >> $GITHUB_OUTPUT
+            echo "backend_tag=${DH_USER}/eduscore-backend:latest" >> $GITHUB_OUTPUT
+            echo "frontend_tag=${DH_USER}/eduscore-frontend:latest" >> $GITHUB_OUTPUT
           fi
       - name: Login to DockerHub
         if: steps.dockerhub.outputs.push == 'true'
@@ -155,10 +155,10 @@ jobs:
           aws-region: ${{ env.AWS_REGION }}
       - name: Creer les repositories ECR si besoin
         run: |
-          aws ecr describe-repositories --repository-names projet-cloud-backend --region "$AWS_REGION" >/dev/null 2>&1 \
-            || aws ecr create-repository --repository-name projet-cloud-backend --region "$AWS_REGION" >/dev/null
-          aws ecr describe-repositories --repository-names projet-cloud-frontend --region "$AWS_REGION" >/dev/null 2>&1 \
-            || aws ecr create-repository --repository-name projet-cloud-frontend --region "$AWS_REGION" >/dev/null
+          aws ecr describe-repositories --repository-names eduscore-backend --region "$AWS_REGION" >/dev/null 2>&1 \
+            || aws ecr create-repository --repository-name eduscore-backend --region "$AWS_REGION" >/dev/null
+          aws ecr describe-repositories --repository-names eduscore-frontend --region "$AWS_REGION" >/dev/null 2>&1 \
+            || aws ecr create-repository --repository-name eduscore-frontend --region "$AWS_REGION" >/dev/null
       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
@@ -167,7 +167,7 @@ jobs:
         with:
           context: ./backend
           push: true
-          tags: ${{ steps.login-ecr.outputs.registry }}/projet-cloud-backend:latest
+          tags: ${{ steps.login-ecr.outputs.registry }}/eduscore-backend:latest
       - name: Build frontend et push ECR
         uses: docker/build-push-action@v6
         with:
@@ -176,4 +176,4 @@ jobs:
           build-args: |
             VITE_API_URL=/api
             VITE_GOOGLE_CLIENT_ID=${{ vars.VITE_GOOGLE_CLIENT_ID }}
-          tags: ${{ steps.login-ecr.outputs.registry }}/projet-cloud-frontend:latest
+          tags: ${{ steps.login-ecr.outputs.registry }}/eduscore-frontend:latest
