@@ -5,13 +5,15 @@ En conteneur (Docker / ECS), il n'y a pas de .env : c'est un no-op, les variable
 viennent de l'environnement.
 """
 
-from contextlib import asynccontextmanager
 import logging
+from contextlib import asynccontextmanager
 
 from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+# pyrefly: ignore [missing-import]
 from slowapi import _rate_limit_exceeded_handler
+# pyrefly: ignore [missing-import]
 from slowapi.errors import RateLimitExceeded
 
 from app.db import init_db
