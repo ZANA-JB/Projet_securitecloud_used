@@ -53,9 +53,9 @@ env:
   # Un fork qui nomme son cluster/ses services autrement cree les Variables
   # ECS_CLUSTER, ECS_BACKEND_SERVICE, ECS_FRONTEND_SERVICE (voir AUTOMATION.md).
   AWS_REGION: ${{ vars.AWS_REGION || 'eu-west-1' }}
-  ECS_CLUSTER: ${{ vars.ECS_CLUSTER || 'eduscore-cluster' }}
-  ECS_BACKEND_SERVICE: ${{ vars.ECS_BACKEND_SERVICE || 'eduscore-backend-service' }}
-  ECS_FRONTEND_SERVICE: ${{ vars.ECS_FRONTEND_SERVICE || 'eduscore-frontend-service' }}
+  ECS_CLUSTER: ${{ vars.ECS_CLUSTER || 'Projet_cloud' }}
+  ECS_BACKEND_SERVICE: ${{ vars.ECS_BACKEND_SERVICE || 'eduscore-backend-alb-service' }}
+  ECS_FRONTEND_SERVICE: ${{ vars.ECS_FRONTEND_SERVICE || 'eduscore-frontend-alb-service' }}
 
 jobs:
   prep:
