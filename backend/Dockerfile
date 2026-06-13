@@ -1,6 +1,6 @@
 # Image de base figee par digest pour reproductibilite (le tag :3.11-slim-bookworm
 # bouge dans le temps). Mettre a jour periodiquement en re-pinnant le nouveau sha.
-FROM python:3.11-slim-bookworm@sha256:cd67330292a51e2963156f74ff340455d66b2172e9190e99f40dff9357471177
+FROM python:3.11-slim-bookworm
 
 # upgrade : recupere les patches de securite OS publies apres la derniere
 # republication de l'image de base (sinon Trivy bloque sur des CVE deja
@@ -33,12 +33,12 @@ COPY --chown=appuser tests/ ./tests/
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --frozen --no-dev
 
-RUN mkdir -p /app/models && chown -R appuser:appuser /app/models
+RUN mkdir -p /app/models && chown -R appuser:appuser /app
 
 USER appuser
 
-EXPOSE ${PORT}
+EXPOSE 8000
 HEALTHCHECK --interval=30s --timeout=5s --retries=3 \
     CMD curl -fsS http://localhost:${PORT}/health || exit 1
 
-CMD ["sh", "-c", "uvicorn app.main:app --host 0.0.0.0 --port ${PORT}"]
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]

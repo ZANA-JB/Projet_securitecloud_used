@@ -22,7 +22,7 @@ export default function AdminLayout() {
       <aside className="sidebar">
         <Link to="/" className="sidebar-brand">
           <div className="brand-mark sm">μ</div>
-          <div className="brand-name">MicroScore</div>
+          <div className="brand-name">EduScore</div>
         </Link>
 
         <nav className="sidebar-nav">

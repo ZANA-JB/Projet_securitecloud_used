@@ -21,11 +21,32 @@ from app.schemas import (
 router = APIRouter(prefix="/admin", tags=["admin"], dependencies=[Depends(require_admin)])
 
 
-ACCEPTED_LABELS = {"accordé", "accorde", "accepted", "approved", "1", "versicolor", "virginica"}
+NORMALIZED_STATUS = {
+    "en réussite": "En réussite",
+    "en reussite": "En réussite",
+    "reussite": "En réussite",
+    "success": "En réussite",
+    "reuss": "En réussite",
+    "accordé": "En réussite",
+    "accorde": "En réussite",
+    "refusé": "À risque de décrochage",
+    "refuse": "À risque de décrochage",
+    "refus": "À risque de décrochage",
+    "à surveiller": "À surveiller",
+    "a surveiller": "À surveiller",
+    "à risque de décrochage": "À risque de décrochage",
+    "a risque de decrochage": "À risque de décrochage",
+    "risque de décrochage": "À risque de décrochage",
+}
+
+
+def _normalize_status(prediction: str) -> str:
+    normalized = prediction.strip().lower()
+    return NORMALIZED_STATUS.get(normalized, prediction.strip())
 
 
 def _is_accepted(prediction: str) -> bool:
-    return prediction.strip().lower() in ACCEPTED_LABELS
+    return _normalize_status(prediction) == "En réussite"
 
 
 @router.get("/stats", response_model=AdminStats)
@@ -76,7 +97,7 @@ def get_stats(db: Session = Depends(get_db)) -> AdminStats:
         score_distribution.append(StatsScoreBin(bin=label, n=n))
 
     # Status breakdown
-    status_counter = Counter("Accordé" if _is_accepted(p.prediction) else "Refusé" for p in all_predictions)
+    status_counter = Counter(_normalize_status(p.prediction) for p in all_predictions)
     status_breakdown = [StatsStatusSlice(name=k, value=v) for k, v in status_counter.items()]
 
     return AdminStats(

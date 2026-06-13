@@ -84,10 +84,7 @@ export default function AdminLogin() {
       <div className="login-card">
         <div className="login-brand">
           <div className="brand-mark">μ</div>
-          <div>
-            <div className="brand-name">MicroScore</div>
-            <div className="brand-sub">Accès sécurisé</div>
-          </div>
+          <div className="brand-name">EduScore</div>
         </div>
 
         <p className="login-intro">

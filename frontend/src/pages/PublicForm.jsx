@@ -4,26 +4,13 @@ import { getToken, getUser, logout } from '../auth'
 
 const API = import.meta.env.VITE_API_URL || '/api'
 
-const SITUATIONS = [
-  { label: 'Célibataire', value: 0 },
-  { label: 'Marié(e)', value: 1 },
-  { label: 'Divorcé(e)', value: 2 },
-  { label: 'Veuf / Veuve', value: 3 },
-]
-
-const PROFESSIONS = [
-  { label: 'Salarié(e)', value: 0 },
-  { label: 'Indépendant(e) / Commerçant(e)', value: 1 },
-  { label: 'Agriculteur / Éleveur', value: 2 },
-  { label: 'Étudiant(e)', value: 3 },
-  { label: 'Sans emploi', value: 4 },
-]
-
-const HISTORIQUE = [
-  { label: 'Aucun crédit auparavant', value: 0 },
-  { label: 'Crédit en cours', value: 1 },
-  { label: 'Crédit remboursé sans incident', value: 2 },
-  { label: 'Crédit avec retards', value: 3 },
+const DEFAULT_SUBJECTS = [
+  { label: 'Mathématiques', value: 0 },
+  { label: 'Français', value: 1 },
+  { label: 'Anglais', value: 2 },
+  { label: 'Sciences', value: 3 },
+  { label: 'Histoire', value: 4 },
+  { label: 'Informatique', value: 5 },
 ]
 
 export default function PublicForm() {
@@ -31,15 +18,16 @@ export default function PublicForm() {
   const user = getUser()
   const [step, setStep] = useState('form')
   const [health, setHealth] = useState('checking')
+  const [fieldsApi, setFieldsApi] = useState(null)
   const [form, setForm] = useState({
-    nom: '',
-    age: 30,
-    situation: 1,
-    profession: 0,
-    revenu: 200000,
-    montant: 500000,
-    duree: 12,
-    historique: 0,
+    applicant_name: '',
+    level: 2,
+    main_subject: 0,
+    average_grade: 12.0,
+    attendance_rate: 90.0,
+    study_hours_per_week: 5,
+    resources_access: 1,
+    last_exam_result: 0,
   })
   const [result, setResult] = useState(null)
   const [error, setError] = useState(null)
@@ -49,6 +37,12 @@ export default function PublicForm() {
       .then((r) => r.json())
       .then((d) => setHealth(d.status))
       .catch(() => setHealth('down'))
+
+    // Récupère la définition des champs depuis le backend (nommage canonique)
+    fetch(`${API}/fields`)
+      .then((r) => r.json())
+      .then((d) => setFieldsApi(d))
+      .catch(() => setFieldsApi(null))
   }, [])
 
   const updateField = (key, value) => setForm((f) => ({ ...f, [key]: value }))
@@ -58,16 +52,6 @@ export default function PublicForm() {
     setError(null)
     setStep('loading')
 
-    const features = [
-      form.age,
-      form.situation,
-      form.profession,
-      form.revenu / 1000,
-      form.montant / 1000,
-      form.duree,
-      form.historique,
-    ]
-
     try {
       const r = await fetch(`${API}/predict`, {
         method: 'POST',
@@ -75,12 +59,7 @@ export default function PublicForm() {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${getToken()}`,
         },
-        body: JSON.stringify({
-          features,
-          applicant_name: form.nom,
-          amount: form.montant,
-          duration_months: form.duree,
-        }),
+        body: JSON.stringify(form),
       })
       if (r.status === 401 || r.status === 403) {
         logout()
@@ -113,10 +92,10 @@ export default function PublicForm() {
       <header className="header">
         <div className="header-inner">
           <div className="brand">
-            <div className="brand-mark">μ</div>
+            <div className="brand-mark">E</div>
             <div>
-              <div className="brand-name">MicroScore</div>
-              <div className="brand-sub">Évaluation de dossier de crédit</div>
+              <div className="brand-name">EduScore</div>
+              <div className="brand-sub">Évaluation du risque de décrochage scolaire</div>
             </div>
           </div>
           <div className="header-right">
@@ -141,102 +120,101 @@ export default function PublicForm() {
 
       <main className="main">
         {step === 'form' && (
-          <FormPanel form={form} updateField={updateField} submit={submit} error={error} />
+          <FormPanel form={form} updateField={updateField} submit={submit} error={error} fieldsApi={fieldsApi} />
         )}
         {step === 'loading' && <LoadingPanel />}
         {step === 'result' && result && <ResultPanel form={form} result={result} reset={reset} />}
       </main>
 
       <footer className="footer">
-        Démo pédagogique — Master IA 2iE — Les décisions de crédit réelles relèvent d'un comité humain.
+        Démo pédagogique — Master IA 2iE — Cette évaluation reste indicative.
       </footer>
     </div>
   )
 }
 
-function FormPanel({ form, updateField, submit, error }) {
+function FormPanel({ form, updateField, submit, error, fieldsApi }) {
+  const LEVELS = [
+    { label: 'Primaire', value: 0 },
+    { label: 'Collège', value: 1 },
+    { label: 'Lycée', value: 2 },
+    { label: 'Supérieur', value: 3 },
+  ]
+
+  const SUBJECTS = fieldsApi?.main_subjects || DEFAULT_SUBJECTS
+
   return (
     <form onSubmit={submit} className="card">
       <div className="card-header">
-        <h1>Nouvelle demande de crédit</h1>
-        <p>Renseignez les informations du demandeur pour obtenir une évaluation.</p>
+        <h1>Évaluation scolaire</h1>
+        <p>Renseignez le profil pour obtenir une prédiction de risque de décrochage.</p>
       </div>
 
       <section className="section">
-        <h2>Identité</h2>
+        <h2>Informations</h2>
         <div className="grid">
-          <Field label="Nom complet">
+          <Field label="Nom de l'élève">
             <input
               type="text"
-              value={form.nom}
-              onChange={(e) => updateField('nom', e.target.value)}
+              value={form.applicant_name}
+              onChange={(e) => updateField('applicant_name', e.target.value)}
               placeholder="Ex. Aminata Ouédraogo"
-              required
             />
           </Field>
-          <Field label="Âge">
-            <input
-              type="number"
-              min="18"
-              max="80"
-              value={form.age}
-              onChange={(e) => updateField('age', Number(e.target.value))}
-              required
-            />
-          </Field>
-          <Select
-            label="Situation familiale"
-            value={form.situation}
-            options={SITUATIONS}
-            onChange={(v) => updateField('situation', v)}
-          />
-          <Select
-            label="Profession"
-            value={form.profession}
-            options={PROFESSIONS}
-            onChange={(v) => updateField('profession', v)}
-          />
-        </div>
-      </section>
 
-      <section className="section">
-        <h2>Crédit demandé</h2>
-        <div className="grid">
-          <Field label="Revenu mensuel (FCFA)">
-            <input
-              type="number"
-              min="0"
-              step="10000"
-              value={form.revenu}
-              onChange={(e) => updateField('revenu', Number(e.target.value))}
-              required
-            />
-          </Field>
-          <Field label="Montant demandé (FCFA)">
-            <input
-              type="number"
-              min="0"
-              step="50000"
-              value={form.montant}
-              onChange={(e) => updateField('montant', Number(e.target.value))}
-              required
-            />
-          </Field>
-          <Field label="Durée souhaitée (mois)">
-            <input
-              type="number"
-              min="3"
-              max="60"
-              value={form.duree}
-              onChange={(e) => updateField('duree', Number(e.target.value))}
-              required
-            />
-          </Field>
+          <Select label="Niveau scolaire" value={form.level} options={LEVELS} onChange={(v) => updateField('level', v)} />
+
           <Select
-            label="Historique de crédit"
-            value={form.historique}
-            options={HISTORIQUE}
-            onChange={(v) => updateField('historique', v)}
+            label="Filière / matière principale"
+            value={form.main_subject}
+            options={SUBJECTS}
+            onChange={(v) => updateField('main_subject', v)}
+          />
+
+          <Field label="Note moyenne (sur 20)">
+            <input
+              type="number"
+              min="0"
+              max="20"
+              step="0.1"
+              value={form.average_grade}
+              onChange={(e) => updateField('average_grade', Number(e.target.value))}
+            />
+          </Field>
+
+          <Field label="Taux d'assiduité (%)">
+            <input
+              type="number"
+              min="0"
+              max="100"
+              step="0.1"
+              value={form.attendance_rate}
+              onChange={(e) => updateField('attendance_rate', Number(e.target.value))}
+            />
+          </Field>
+
+          <Field label="Heures d'étude par semaine">
+            <input
+              type="number"
+              min="0"
+              max="80"
+              value={form.study_hours_per_week}
+              onChange={(e) => updateField('study_hours_per_week', Number(e.target.value))}
+            />
+          </Field>
+
+          <Select
+            label="Accès aux ressources (0=aucun,3=très bon)"
+            value={form.resources_access}
+            options={[{ label: '0', value: 0 }, { label: '1', value: 1 }, { label: '2', value: 2 }, { label: '3', value: 3 }]}
+            onChange={(v) => updateField('resources_access', v)}
+          />
+
+          <Select
+            label="Résultat dernier examen"
+            value={form.last_exam_result}
+            options={[{ label: 'Réussi', value: 0 }, { label: 'Échoué', value: 1 }, { label: "Non passé", value: 2 }]}
+            onChange={(v) => updateField('last_exam_result', v)}
           />
         </div>
       </section>
@@ -245,7 +223,7 @@ function FormPanel({ form, updateField, submit, error }) {
 
       <div className="actions">
         <button type="submit" className="btn-primary">
-          Évaluer la demande
+          Évaluer
         </button>
       </div>
     </form>
@@ -257,46 +235,44 @@ function LoadingPanel() {
     <div className="card loading">
       <div className="spinner" />
       <h2>Analyse en cours</h2>
-      <p>Évaluation du dossier basée sur l'historique et le profil du demandeur.</p>
+      <p>Évaluation du profil pour estimer le risque de décrochage.</p>
     </div>
   )
 }
 
 function ResultPanel({ form, result, reset }) {
-  const score = result.score ?? (result.proba ? Math.round(result.proba[result.proba.length - 1] * 1000) : null)
-  const accepted = result.prediction === 'accordé' || result.prediction === 1 || (score !== null && score >= 600)
-  const risque = score !== null ? (score >= 750 ? 'Faible' : score >= 500 ? 'Modéré' : 'Élevé') : '—'
+  const score = result.score ?? (result.proba ? Math.round(Math.max(...result.proba) * 100) : null)
+  const success = String(result.prediction).toLowerCase().includes('réuss') || String(result.prediction).toLowerCase().includes('reuss')
+  const risk = score !== null ? (score >= 75 ? 'Faible' : score >= 50 ? 'Modéré' : 'Élevé') : '—'
 
   return (
     <div className="card result">
-      <div className={`badge ${accepted ? 'badge-ok' : 'badge-ko'}`}>
-        {accepted ? '✓ Dossier favorable' : '✗ Dossier défavorable'}
+      <div className={`badge ${success ? 'badge-ok' : 'badge-ko'}`}>
+        {success ? 'Profil en réussite' : 'Profil à risque'}
       </div>
 
-      <h1>Évaluation pour {form.nom || 'le demandeur'}</h1>
+      <h1>Évaluation pour {form.applicant_name || 'l’élève'}</h1>
 
       <div className="metrics">
-        <Metric label="Score" value={score ?? '—'} suffix={score ? '/1000' : ''} />
-        <Metric label="Risque" value={risque} />
-        <Metric label="Montant" value={form.montant.toLocaleString('fr-FR')} suffix=" FCFA" />
-        <Metric label="Durée" value={form.duree} suffix=" mois" />
+        <Metric label="Score" value={score ?? '—'} suffix={score ? '/100' : ''} />
+        <Metric label="Risque" value={risk} />
+        <Metric label="Niveau" value={['Primaire', 'Collège', 'Lycée', 'Supérieur'][form.level] || '—'} />
+        <Metric label="Filière" value={DEFAULT_SUBJECTS.find((s) => s.value === form.main_subject)?.label || '—'} />
       </div>
 
       <div className="recommendation">
         <h3>Recommandation</h3>
         <p>
-          {accepted
-            ? `Le profil et l'historique du demandeur sont compatibles avec le crédit demandé. Une vérification finale en comité reste recommandée.`
-            : `Le profil présente des facteurs de risque significatifs. Envisager un montant inférieur, une garantie complémentaire, ou un refus argumenté.`}
+          {success
+            ? `Le profil semble en réussite. Maintenir le suivi et encourager les bonnes pratiques.`
+            : `Le profil montre des signaux de fragilité. Mettre en place un accompagnement ciblé (tutorat, ressources, suivi).`}
         </p>
-        <p className="note">
-          Cette évaluation est une aide à la décision, pas une décision automatique. Le comité de crédit garde la responsabilité finale.
-        </p>
+        <p className="note">Cette évaluation est indicative et doit être complétée par un examen humain.</p>
       </div>
 
       <div className="actions">
         <button onClick={reset} className="btn-secondary">
-          Nouvelle demande
+          Nouvelle évaluation
         </button>
       </div>
     </div>

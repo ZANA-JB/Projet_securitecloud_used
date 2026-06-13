@@ -1,7 +1,8 @@
-"""Compatibilité pour l'ancien chemin d'import du modèle EduScore.
+"""Alias du modèle EduScore.
 
-Plusieurs modules du backend importent encore `app.ml.credit_model`. Le code
-réel vit dans `decrochage_model.py`; ce module réexporte simplement l'API.
+Ce module expose la même API que `app.ml.decrochage_model` sans dupliquer
+la logique métier. Il est utilisé par les imports existants dans le backend
+et les scripts de training.
 """
 
 from app.ml.decrochage_model import (

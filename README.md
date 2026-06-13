@@ -1,18 +1,12 @@
-# Projet Cloud — Template MicroScore (Master IA, 2iE)
+# Projet Cloud — Template EduScore (Master IA, 2iE)
 
 
-Template pédagogique du projet fil rouge des ECUE *Projet Cloud* et
-*Sécurité & Coûts dans le Cloud*. Le cas d'usage fourni est **MicroScore** :
-une application de scoring de crédit en microfinance.
+ Le cas d'usage fourni dans ce dépôt est
+**EduScore** : une application pédagogique d'évaluation du risque de
+décrochage scolaire.
 
-Objectif étudiant : partir de ce template, le lancer en local, remplacer le
-cas d'usage par celui du groupe, pousser les images sur Docker Hub puis AWS
-ECR, et déployer sur ECS Fargate dans le VPC/IAM construits en séance.
 
-## Démarrage Étudiant
-
-Pré-requis : Docker Desktop, Git, un terminal, un compte GitHub. Pour la suite
-du cours : Docker Hub, AWS CLI configuré et accès AWS de votre groupe.
+## Démarrage 
 
 ```bash
 git clone https://github.com/<votre-org>/<votre-repo>.git
@@ -86,9 +80,7 @@ Variables à connaître :
 | `MODEL_S3_BUCKET`, `MODEL_S3_KEY` | Chargement du modèle depuis S3 |
 | `AWS_REGION` | Région AWS, par défaut `eu-west-1` |
 
-Le fichier `client_secret_*.json` téléchargé depuis Google Cloud ne doit pas
-être copié dans le projet. Pour cette app, on utilise seulement le `client_id`
-public qu'il contient.
+
 
 Pour activer Google Login en local :
 
@@ -109,23 +101,62 @@ puis recharger la page.
 
 ## Architecture
 
-Les schémas AWS et leur explication sont dans [`infra/aws/`](infra/aws/) :
+Le schémas AWS est dans [`infra/aws/`](infra/aws/) :
 
-- `architecture.png` : variante de référence, tâches ECS en subnet privé.
-- `architecture-budget.png` : variante de TP, sans NAT Gateway, tâches ECS en subnet public protégées par Security Groups.
+- `architecture_AWS.png` : image de l'architecture AWS
 
-```
-Navigateur
-   │
-   ▼
-frontend React + Vite, servi par nginx (:5173)
-   │ /api/*
-   ▼
-backend FastAPI (:8000)
-   ├── /predict : scoring ML, JWT requis, rate-limité
-   ├── /auth/google : login Google -> JWT
-   ├── /admin/* : stats et historique protégés
-   └── PostgreSQL + modèle ML local/S3
+## Architecture AWS
+
+```mermaid
+graph TB
+    subgraph internet["Internet public"]
+        users["👥 Utilisateurs<br/>(Navigateurs)"]
+    end
+
+    subgraph aws["AWS - Région eu-west-1"]
+        subgraph vpc["VPC"]
+            subgraph public_a["AZ A - Sous-réseau public"]
+                alb["🔀 Application Load Balancer<br/>(Port 80/443)"]
+                ecs_frontend["🐳 ECS Frontend<br/>(React + Nginx)"]
+            end
+
+            subgraph public_b["AZ B - Sous-réseau public"]
+                ecs_backend["🐳 ECS Backend<br/>(FastAPI)"]
+            end
+
+            subgraph private["Sous-réseau privé"]
+                rds["🗄️ PostgreSQL RDS<br/>(Chiffré, privé)"]
+                s3_access["S3 Gateway VPC<br/>(Accès modèle ML)"]
+            end
+        end
+
+        subgraph external["Services externes"]
+            s3["📦 S3 Bucket<br/>(model.pkl,<br/>chiffré, privé)"]
+            ssm["🔑 AWS SSM<br/>Parameter Store<br/>(Secrets)"]
+            logs["📊 CloudWatch Logs<br/>(Monitoring)"]
+        end
+    end
+
+    users -->|HTTPS| alb
+    alb -->|/api/*| ecs_backend
+    alb -->|/*| ecs_frontend
+
+    ecs_backend -->|Query/Insert| rds
+    ecs_backend -->|GET model.pkl| s3
+    ecs_backend -->|Secrets| ssm
+    ecs_backend -->|Logs| logs
+
+    ecs_frontend -->|Logs| logs
+
+    s3_access -.->|Via VPC Gateway| s3
+
+    style alb fill:#FF9900
+    style ecs_backend fill:#4B9BFF
+    style ecs_frontend fill:#4B9BFF
+    style rds fill:#527FFF
+    style s3 fill:#FF9900
+    style ssm fill:#FF9900
+    style logs fill:#146EB4
 ```
 
 Services Docker Compose :
@@ -164,21 +195,21 @@ Le backend sans Docker utilise sqlite par défaut. Avec Docker Compose,
 
 ## Modèle ML
 
-Le formulaire MicroScore envoie 7 features :
+Le formulaire EduScore envoie 7 features :
 
-1. âge
-2. situation familiale
-3. profession
-4. revenu mensuel en milliers de FCFA
-5. montant demandé en milliers de FCFA
-6. durée en mois
-7. historique de crédit
+1. niveau scolaire
+2. matière principale
+3. note moyenne
+4. taux d'assiduité
+5. heures d'étude par semaine
+6. accès aux ressources
+7. résultat du dernier examen
 
 Le backend charge le modèle dans cet ordre :
 
-1. S3 si `MODEL_S3_BUCKET` est défini.
+1. S3 si `MODEL_S3_BUCKET` est défini ou si `MODEL_PATH` est un URI `s3://...`.
 2. Fichier local si `MODEL_PATH` existe.
-3. Fallback MicroScore entraîné automatiquement.
+3. Fallback EduScore entraîné automatiquement.
 
 Flux à retenir :
 
@@ -205,8 +236,8 @@ backend/models/model.pkl
 Créer le bucket S3 privé et uploader le modèle :
 
 ```bash
-aws s3 mb s3://2ie-<groupe>-models --region eu-west-1
-aws s3 cp backend/models/model.pkl s3://2ie-<groupe>-models/model.pkl
+aws s3 mb s3://2ie-bakouan01-models --region eu-west-1
+aws s3 cp backend/models/model.pkl s3://2ie-bakouan01-models/model.pkl
 ```
 
 Ou utiliser le script du template, qui crée le bucket privé si nécessaire et
@@ -224,8 +255,7 @@ MODEL_S3_KEY=model.pkl
 AWS_REGION=eu-west-1
 ```
 
-En local, on peut utiliser des clés AWS dans `.env` si le compte de TP le
-prévoit. Sur ECS, on utilise un rôle IAM attaché à la task, pas de clés en dur.
+
 
 Important : `scripts/build-images.sh`, `scripts/push-dockerhub.sh` et
 `scripts/push-ecr.sh` construisent/poussent des images Docker. Ils ne créent
@@ -332,38 +362,14 @@ ajouter le secret GitHub :
 
 ## ECS Fargate
 
-À réutiliser depuis la séance IAM/VPC :
 
 - VPC avec subnets publics et privés.
 - Rôle `ecsTaskExecutionRole` pour ECR + CloudWatch Logs.
-- Rôle applicatif avec lecture seule sur `s3://2ie-<groupe>-models/model.pkl`.
-- Security groups : `alb-sg`, `backend-sg`, `db-sg`.
+- Rôle applicatif avec lecture seule sur `s3://2ie-bakouan01-models/model.pkl`.
+- Security groups : `ALB-SG`, `BACKEND-SG`, `DB-SG`.
 - RDS PostgreSQL dans subnet privé.
 - ALB public vers le service ECS.
 
-Fichiers d'exemple :
-
-- `infra/aws/s3-model-read-policy.example.json`
-- `infra/aws/task-definition-backend.example.json`
-- `infra/aws/task-definition-frontend.example.json`
-
-Variables d'environnement à mettre dans la task definition backend :
-
-```bash
-DATABASE_URL=postgresql://<user>:<password>@<rds-endpoint>:5432/<db>
-MODEL_S3_BUCKET=2ie-<groupe>-models
-MODEL_S3_KEY=model.pkl
-AWS_REGION=eu-west-1
-GOOGLE_CLIENT_ID=<client-id-google>
-JWT_SECRET=<secret-long-aleatoire>
-ADMIN_EMAILS=<email-admin-1>,<email-admin-2>
-```
-
-Le frontend en production doit être buildé avec :
-
-```bash
-VITE_API_URL=/api
-VITE_GOOGLE_CLIENT_ID=<client-id-google>
 ```
 
 ## Vérifications Avant Rendu
@@ -383,7 +389,7 @@ docker compose up --build
 Checklist :
 
 - `http://localhost:5173` redirige vers `/login` si aucun utilisateur n'est connecté.
-- Une demande de crédit retourne un score.
+- Une évaluation scolaire retourne un score.
 - `/login` affiche le bouton Google.
 - Un admin connecté voit les statistiques et l'historique.
 - Aucun secret n'est commité.
@@ -394,22 +400,12 @@ Checklist :
 .
 ├── backend/                  API FastAPI
 ├── frontend/                 React + Vite + nginx
-├── scripts/train.py          entraînement du modèle MicroScore
-├── docs/livrable1/           sécurité, coûts, cartographie des risques
-├── docs/livrable2/           rapport final
+├── scripts/train.py          entraînement du modèle EduScore
 ├── docker-compose.yml
 ├── .env.example
 └── .github/workflows/ci-cd.yml
 ```
 
-## Règles Non Négociables
 
-- `uv` pour Python, jamais `requirements.txt`.
-- `.env` jamais commité.
-- Aucun secret en dur dans le code.
-- Les fichiers `client_secret*.json` restent hors dépôt.
-- Le formulaire de scoring exige une authentification Google.
-- `/predict` reste rate-limité.
-- Pas de push Git automatique : chaque groupe contrôle ses commits et ses pushs.
 
 Projet pédagogique — Master IA, 2iE.
