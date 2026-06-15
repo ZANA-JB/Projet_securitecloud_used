@@ -1,15 +1,15 @@
 {
-  "family": "projet-cloud-backend",
+  "family": "eduscore-backend",
   "networkMode": "awsvpc",
   "requiresCompatibilities": ["FARGATE"],
   "cpu": "512",
   "memory": "1024",
   "executionRoleArn": "arn:aws:iam::<account-id>:role/ecsTaskExecutionRole",
-  "taskRoleArn": "arn:aws:iam::<account-id>:role/projet-cloud-backend-task-role",
+  "taskRoleArn": "arn:aws:iam::<account-id>:role/eduscore-backend-task-role",
   "containerDefinitions": [
     {
       "name": "backend",
-      "image": "<account-id>.dkr.ecr.<region>.amazonaws.com/projet-cloud-backend:latest",
+      "image": "639914974992.dkr.ecr.eu-west-1.amazonaws.com/eduscore-backend:latest",
       "essential": true,
       "portMappings": [
         {
@@ -27,17 +27,17 @@
       "secrets": [
         {
           "name": "DATABASE_URL",
-          "valueFrom": "arn:aws:ssm:<region>:<account-id>:parameter/projet-cloud/DATABASE_URL"
+          "valueFrom": "arn:aws:ssm:<region>:<account-id>:parameter/eduscore/DATABASE_URL"
         },
         {
           "name": "JWT_SECRET",
-          "valueFrom": "arn:aws:ssm:<region>:<account-id>:parameter/projet-cloud/JWT_SECRET"
+          "valueFrom": "arn:aws:ssm:<region>:<account-id>:parameter/eduscore/JWT_SECRET"
         }
       ],
       "logConfiguration": {
         "logDriver": "awslogs",
         "options": {
-          "awslogs-group": "/ecs/projet-cloud-backend",
+          "awslogs-group": "/ecs/eduscore-backend",
           "awslogs-region": "<region>",
           "awslogs-stream-prefix": "ecs"
         }

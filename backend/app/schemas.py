@@ -16,16 +16,23 @@ class ItemOut(ItemIn):
 
 
 class PredictIn(BaseModel):
-    """Entrée pour /predict.
+    """Entrée pour /predict pour EduScore (7 features éducation)."""
 
-    Les champs métier (nom, montant, durée) sont optionnels mais recommandés
-    pour que l'admin dashboard puisse les afficher.
-    """
+    # 0=Primaire,1=Collège,2=Lycée,3=Supérieur
+    level: int = Field(..., ge=0, le=3)
 
-    features: list[float] = Field(..., min_length=1)
+    # main_subject as categorical index (0..n)
+    main_subject: int = Field(..., ge=0)
+
+    average_grade: float = Field(..., ge=0, le=20)
+    attendance_rate: float = Field(..., ge=0, le=100)
+    study_hours_per_week: int = Field(..., ge=0)
+    resources_access: int = Field(..., ge=0, le=3)
+
+    # 0=Réussi,1=Échoué,2=Non passé
+    last_exam_result: int = Field(..., ge=0, le=2)
+
     applicant_name: str | None = None
-    amount: float | None = None
-    duration_months: int | None = None
 
 
 class PredictOut(BaseModel):
@@ -40,6 +47,7 @@ class PredictionHistoryItem(BaseModel):
 
     id: int
     applicant_name: str | None = None
+    features: dict | list | None = None
     prediction: str
     score: int | None = None
     amount: float | None = None

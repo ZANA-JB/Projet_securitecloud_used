@@ -15,7 +15,11 @@ import {
 import { adminFetch } from '../auth'
 
 const API = import.meta.env.VITE_API_URL || '/api'
-const STATUS_COLORS = { 'Accordé': '#2E7D32', 'Refusé': '#C62828' }
+const STATUS_COLORS = {
+  'En réussite': '#2E7D32',
+  'À surveiller': '#FF9800',
+  'À risque de décrochage': '#C62828',
+}
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState(null)
@@ -54,21 +58,21 @@ export default function AdminDashboard() {
     <div className="dash">
       <div className="dash-header">
         <h1>Tableau de bord</h1>
-        <p>Vue d'ensemble des demandes traitées par la plateforme.</p>
+        <p>Vue d'ensemble des évaluations de risque scolaire traitées par la plateforme.</p>
       </div>
 
       {isEmpty && (
         <div className="empty-state">
           <h3>Aucune donnée pour l'instant</h3>
           <p>
-            Soumettez une demande de crédit depuis le <a href="/">formulaire</a> — elle apparaîtra ici.
+            Soumettez une évaluation scolaire depuis le <a href="/">formulaire</a> — elle apparaîtra ici.
           </p>
         </div>
       )}
 
       <div className="kpi-grid">
-        <Kpi label="Total demandes" value={kpi.total} />
-        <Kpi label="Taux d'acceptation" value={`${kpi.accepted_rate}%`} />
+        <Kpi label="Total évaluations" value={kpi.total} />
+        <Kpi label="Taux de réussite" value={`${kpi.accepted_rate}%`} />
         <Kpi label="Score moyen" value={kpi.avg_score} suffix="/1000" />
         <Kpi label="Cette semaine" value={kpi.this_week} />
       </div>
@@ -76,7 +80,7 @@ export default function AdminDashboard() {
       <div className="dash-grid">
         <div className="dash-card wide">
           <div className="dash-card-header">
-            <h2>Demandes par jour</h2>
+            <h2>Évaluations par jour</h2>
             <span className="dash-card-sub">14 derniers jours</span>
           </div>
           <ResponsiveContainer width="100%" height={260}>

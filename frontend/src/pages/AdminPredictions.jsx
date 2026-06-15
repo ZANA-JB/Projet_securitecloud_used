@@ -3,7 +3,29 @@ import { adminFetch } from '../auth'
 
 const API = import.meta.env.VITE_API_URL || '/api'
 
-const ACCEPTED_LABELS = new Set(['accordé', 'accorde', 'accepted', 'approved', '1', 'versicolor', 'virginica'])
+const ACCEPTED_LABELS = new Set([
+  'en réussite',
+  'en reussite',
+  'reussite',
+  'success',
+  'reuss',
+  'accordé',
+  'accorde',
+])
+
+const LEGACY_STATUS_MAP = {
+  'accordé': 'En réussite',
+  'accorde': 'En réussite',
+  'refusé': 'À risque de décrochage',
+  'refuse': 'À risque de décrochage',
+  'refus': 'À risque de décrochage',
+}
+
+function normalizePrediction(prediction) {
+  const value = String(prediction || '').trim()
+  const key = value.toLowerCase()
+  return LEGACY_STATUS_MAP[key] || value
+}
 
 function isAccepted(prediction) {
   return ACCEPTED_LABELS.has(String(prediction).toLowerCase())
@@ -48,19 +70,16 @@ export default function AdminPredictions() {
 
   const filtered = predictions.filter((p) => {
     const matchQuery = query === '' || (p.applicant_name || '').toLowerCase().includes(query.toLowerCase())
-    const accepted = isAccepted(p.prediction)
-    const matchStatus =
-      statusFilter === 'all' ||
-      (statusFilter === 'Accordé' && accepted) ||
-      (statusFilter === 'Refusé' && !accepted)
+    const normalizedPrediction = normalizePrediction(p.prediction)
+    const matchStatus = statusFilter === 'all' || normalizedPrediction === statusFilter
     return matchQuery && matchStatus
   })
 
   return (
     <div className="dash">
       <div className="dash-header">
-        <h1>Demandes</h1>
-        <p>Historique des évaluations de crédit. {filtered.length} résultat{filtered.length > 1 ? 's' : ''}.</p>
+        <h1>Évaluations</h1>
+        <p>Historique des évaluations. {filtered.length} résultat{filtered.length > 1 ? 's' : ''}.</p>
       </div>
 
       <div className="filters">
@@ -73,8 +92,9 @@ export default function AdminPredictions() {
         />
         <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="filter-select">
           <option value="all">Tous les statuts</option>
-          <option value="Accordé">Accordé</option>
-          <option value="Refusé">Refusé</option>
+          <option value="En réussite">En réussite</option>
+          <option value="À surveiller">À surveiller</option>
+          <option value="À risque de décrochage">À risque de décrochage</option>
         </select>
       </div>
 
@@ -82,16 +102,16 @@ export default function AdminPredictions() {
         {filtered.length === 0 ? (
           <div className="empty">
             {predictions.length === 0
-              ? 'Aucune demande pour l\'instant. Soumettez-en une depuis le formulaire.'
-              : 'Aucune demande ne correspond à votre recherche.'}
+              ? "Aucune évaluation pour l'instant. Soumettez-en une depuis le formulaire."
+              : 'Aucune évaluation ne correspond à votre recherche.'}
           </div>
         ) : (
           <table className="table">
             <thead>
               <tr>
                 <th>#</th>
-                <th>Demandeur</th>
-                <th>Montant</th>
+                <th>Élève</th>
+                <th>Niveau</th>
                 <th>Score</th>
                 <th>Statut</th>
                 <th>Date</th>
@@ -99,16 +119,17 @@ export default function AdminPredictions() {
             </thead>
             <tbody>
               {filtered.map((p) => {
-                const accepted = isAccepted(p.prediction)
+                const normalizedPrediction = normalizePrediction(p.prediction)
+                const accepted = isAccepted(normalizedPrediction)
                 return (
                   <tr key={p.id}>
                     <td className="mono">#{p.id}</td>
                     <td>{p.applicant_name || <span className="muted">Anonyme</span>}</td>
-                    <td>{p.amount ? `${p.amount.toLocaleString('fr-FR')} FCFA` : '—'}</td>
+                    <td>{p.features?.level !== undefined ? ['Primaire', 'Collège', 'Lycée', 'Supérieur'][p.features.level] : '—'}</td>
                     <td>
                       {p.score !== null && p.score !== undefined ? (
                         <div className="score-bar">
-                          <span className="score-bar-fill" style={{ width: `${p.score / 10}%` }} />
+                          <span className="score-bar-fill" style={{ width: `${p.score}%` }} />
                           <span className="score-bar-text">{p.score}</span>
                         </div>
                       ) : (
@@ -117,7 +138,7 @@ export default function AdminPredictions() {
                     </td>
                     <td>
                       <span className={`pill ${accepted ? 'pill-ok' : 'pill-ko'}`}>
-                        {accepted ? 'Accordé' : 'Refusé'}
+                        {normalizedPrediction}
                       </span>
                     </td>
                     <td className="muted">{formatDate(p.created_at)}</td>

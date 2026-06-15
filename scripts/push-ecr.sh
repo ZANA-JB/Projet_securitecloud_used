@@ -17,8 +17,8 @@ fi
 
 AWS_REGION="${AWS_REGION:-eu-west-1}"
 IMAGE_TAG="${IMAGE_TAG:-latest}"
-BACKEND_REPO="${BACKEND_REPO:-projet-cloud-backend}"
-FRONTEND_REPO="${FRONTEND_REPO:-projet-cloud-frontend}"
+BACKEND_REPO="${BACKEND_REPO:-eduscore-backend}"
+FRONTEND_REPO="${FRONTEND_REPO:-eduscore-frontend}"
 REGISTRY="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
 VITE_API_URL="${VITE_API_URL:-/api}"
 VITE_GOOGLE_CLIENT_ID="${VITE_GOOGLE_CLIENT_ID:-}"

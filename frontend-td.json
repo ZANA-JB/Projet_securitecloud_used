@@ -1,0 +1,82 @@
+{
+  "containerDefinitions": [
+    {
+      "name": "eduscore-frontend",
+      "image": "639914974992.dkr.ecr.eu-west-1.amazonaws.com/eduscore-frontend:latest",
+      "cpu": 0,
+      "portMappings": [
+        {
+          "containerPort": 80,
+          "hostPort": 80,
+          "protocol": "tcp"
+        }
+      ],
+      "essential": true,
+      "environment": [
+        {
+          "name": "AWS_REGION",
+          "value": "eu-west-1"
+        },
+        {
+          "name": "DATABASE_URL",
+          "value": "postgres://postgres:KoneBakouan01@database-1.cby4yi2mm3xm.eu-west-1.rds.amazonaws.com:5432/postgres?sslmode=require"
+        },
+        {
+          "name": "PORT",
+          "value": "8000"
+        },
+        {
+          "name": "JWT_SECRET",
+          "value": "6b25d2da92bc9577b7ade335ca6971e06145ac7e90be67f7658f2914b7e3f42e"
+        },
+        {
+          "name": "GOOGLE_CLIENT_ID",
+          "value": "602206238775-5hibhdit41tsnetu45ca2o9077icblif.apps.googleusercontent.com"
+        },
+        {
+          "name": "MODEL_S3_KEY",
+          "value": "model.pkl"
+        },
+        {
+          "name": "ADMIN_EMAILS",
+          "value": "zanakone1205@gmail.com"
+        },
+        {
+          "name": "MODEL_S3_BUCKET",
+          "value": "2ie-bakouan01-models"
+        }
+      ],
+      "mountPoints": [],
+      "volumesFrom": [],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/projet-cloud-backend",
+          "awslogs-region": "eu-west-1",
+          "awslogs-stream-prefix": "ecs"
+        }
+      },
+      "healthCheck": {
+        "command": [
+          "CMD-SHELL",
+          "curl -fsS http://localhost:80/health || exit 1"
+        ],
+        "interval": 30,
+        "timeout": 5,
+        "retries": 3,
+        "startPeriod": 30
+      },
+      "systemControls": []
+    }
+  ],
+  "family": "projet-cloud-frontend",
+  "executionRoleArn": "arn:aws:iam::639914974992:role/ecsTaskExecutionRole",
+  "networkMode": "awsvpc",
+  "volumes": [],
+  "placementConstraints": [],
+  "requiresCompatibilities": [
+    "FARGATE"
+  ],
+  "cpu": "512",
+  "memory": "1024"
+}

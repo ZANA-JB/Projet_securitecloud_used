@@ -2,7 +2,7 @@
   "Version": "2012-10-17",
   "Statement": [
     {
-      "Sid": "ReadMicroScoreModel",
+      "Sid": "ReadEduScoreModel",
       "Effect": "Allow",
       "Action": ["s3:GetObject"],
       "Resource": "arn:aws:s3:::2ie-<groupe>-models/model.pkl"

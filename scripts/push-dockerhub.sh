@@ -47,5 +47,5 @@ EOF
   fi
 }
 
-push_image "${DOCKERHUB_USERNAME}/projet-cloud-backend:${IMAGE_TAG}"
-push_image "${DOCKERHUB_USERNAME}/projet-cloud-frontend:${IMAGE_TAG}"
+push_image "${DOCKERHUB_USERNAME}/eduscore-backend:${IMAGE_TAG}"
+push_image "${DOCKERHUB_USERNAME}/eduscore-frontend:${IMAGE_TAG}"

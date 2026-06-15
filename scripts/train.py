@@ -1,4 +1,4 @@
-"""Entraîne le modèle MicroScore et sauvegarde un artefact joblib."""
+"""Entraîne le modèle EduScore et sauvegarde un artefact joblib."""
 
 from __future__ import annotations
 
@@ -18,7 +18,7 @@ from app.ml.credit_model import FEATURE_NAMES, generate_training_data, train_cre
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Entraîner le modèle de scoring crédit MicroScore.")
+    parser = argparse.ArgumentParser(description="Entraîner le modèle EduScore de prédiction du risque de décrochage.")
     parser.add_argument(
         "--output",
         type=Path,
